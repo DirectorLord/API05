@@ -4,6 +4,7 @@ using E_Commerce.Service.DependencyInjections;
 using E_Commerce.Service.Exceptions;
 using ECommerce.Web.Handlers;
 using ECommerce.Web.Middlewares;
+using Microsoft.AspNetCore.Mvc;
 namespace ECommerce.Web
 {
     public class Program
@@ -23,6 +24,30 @@ namespace ECommerce.Web
             builder.Services.AddSwaggerGen();
             builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
             builder.Services.AddProblemDetails();
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .ToDictionary(
+                            x => x.Key,
+                            e => e.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+                    var problem = new ProblemDetails
+                    {
+                        Title = "One or more validation errors occurred.",
+                        Status = StatusCodes.Status400BadRequest,
+                        Detail = "See the errors property for details.",
+                        Extensions =
+                        {
+                            { "errors", errors }
+                        }
+                    };
+                    return new BadRequestObjectResult("");
+                    
+                };
+            });
 
             var app = builder.Build();
 
