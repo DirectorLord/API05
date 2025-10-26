@@ -1,4 +1,5 @@
-﻿using E_Commerce.Service.Specifications;
+﻿using E_Commerce.Service.Exceptions;
+using E_Commerce.Service.Specifications;
 using E_Commerce.Shared.DataTransferObjects;
 
 namespace E_Commerce.Service.Services;
@@ -14,7 +15,10 @@ internal class ProductService(IUnitOfWork unitOfWork, IMapper mapper)
 
     public async Task<ProductResponse?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var product = await unitOfWork.GetRepository<Product, int>().GetAsync(new ProductWithBrandTypeSpecification(id), cancellationToken);
+        var product = await unitOfWork.GetRepository<Product, int>()
+            .GetAsync(new ProductWithBrandTypeSpecification(id), cancellationToken) ??
+            throw new ProductNotFoundException(id);
+
         return mapper.Map<ProductResponse>(product);
     }
 
