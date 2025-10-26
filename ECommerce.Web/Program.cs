@@ -1,6 +1,8 @@
 using E_Commerce.Domain.Contracts;
 using E_Commerce.Persistence.DependencyInjection;
 using E_Commerce.Service.DependencyInjections;
+using E_Commerce.Service.Exceptions;
+using ECommerce.Web.Handlers;
 using ECommerce.Web.Middlewares;
 namespace ECommerce.Web
 {
@@ -19,6 +21,8 @@ namespace ECommerce.Web
             builder.Services.AddApplicationServices();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             var app = builder.Build();
 
@@ -26,7 +30,7 @@ namespace ECommerce.Web
             var initializer = scope.ServiceProvider.GetRequiredService<IDInitializer>();
             await initializer.InitializeAsync();
 
-            app.UseCustomExceptionHandler();
+            app.UseExceptionHandler();
 
             ///app.Use(async (context, next) =>
             ///{
