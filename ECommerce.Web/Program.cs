@@ -1,6 +1,7 @@
 using E_Commerce.Domain.Contracts;
 using E_Commerce.Persistence.DependencyInjection;
 using E_Commerce.Service.DependencyInjections;
+using ECommerce.Web.Middlewares;
 namespace ECommerce.Web
 {
     public class Program
@@ -25,7 +26,26 @@ namespace ECommerce.Web
             var initializer = scope.ServiceProvider.GetRequiredService<IDInitializer>();
             await initializer.InitializeAsync();
 
-            // Configure the HTTP request pipeline.
+            app.UseCustomExceptionHandler();
+
+            ///app.Use(async (context, next) =>
+            ///{
+            ///    try
+            ///    {
+            ///        await next.Invoke(context);
+            ///    }
+            ///    catch (Exception ex)
+            ///    {
+            ///        Console.WriteLine(ex.Message);
+            ///        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            ///        await context.Response.WriteAsJsonAsync(new
+            ///        {
+            ///            StatusCode = StatusCodes.Status500InternalServerError,
+            ///            Message = ex.Message
+            ///        });
+            ///    }
+            ///});
+            /// Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
