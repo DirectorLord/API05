@@ -9,7 +9,19 @@ public class GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptio
         try
         {
             await next.Invoke(context);
-        }catch (Exception ex)
+            if(context.Response.StatusCode == StatusCodes.Status404NotFound)
+            {
+                var problem = new ProblemDetails
+                {
+                    Title = "Resource not found",
+                    Detail = $"The requested resource '{context.Request.Path}' was not found.",
+                    Instance = context.Request.Path,
+                    Status = StatusCodes.Status404NotFound
+                };
+                await context.Response.WriteAsJsonAsync(problem);
+            }
+        }
+        catch (Exception ex)
         {
             logger.LogError("Something went wrong", ex.Message);
 
